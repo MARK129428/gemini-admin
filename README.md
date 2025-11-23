@@ -29,10 +29,10 @@
 |------------|-------------------------|
 | 前端       | React + Vite            |
 | UI         | Ant Design / Tailwind UI |
-| 状态管理   | Redux / Zustand         |
+| 状态管理   |  Zustand         |
 | 路由       | React Router            |
-| 后端       | 可选 Spring Boot / Node.js |
-| 数据库     | MySQL / PostgreSQL      |
+| 后端       | Spring Boot |
+| 数据库     | MySQL      |
 | 容器化     | Docker                  |
 
 ---
