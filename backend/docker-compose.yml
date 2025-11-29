@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------
+  # 1. Spring Boot 后端服务容器
+  # ----------------------------------------
+  gemini-admin:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gemini-admin-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # 【核心修改点 A】强制应用在 Docker 中使用 prod profile
+      SPRING_PROFILES_ACTIVE: prod
+      # ⚠️ 确保此处的变量与 application-prod.yml 中的 ${...} 占位符匹配
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD} # 注入数据库密码
+      JWT_SECRET: ${JWT_SECRET_KEY} # 注入 JWT 密钥
+    depends_on:
+      - mysql-vol-dev
+      - redis-vol-dev
+    networks:
+      - gemini-net
+
+  # ----------------------------------------
+  # 2. MySQL 数据库服务容器
+  # ----------------------------------------
+  mysql-vol-dev:
+    image: mysql
+    container_name: mysql-vol-dev
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: gemini_admin_db
+      TZ: Asia/Shanghai
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - gemini-net
+    ports:
+      - "3306:3306" # 保持端口映射，以便您使用 DBeaver 等工具连接
+
+  # ----------------------------------------
+  # 3. Redis 缓存服务容器
+  # ----------------------------------------
+  redis-vol-dev:
+    image: redis
+    container_name: redis-vol-dev
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - gemini-net
+    ports:
+      - "6379:6379" # 保持端口映射
+
+# 定义持久化数据卷和网络
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  gemini-net:
+    driver: bridge
